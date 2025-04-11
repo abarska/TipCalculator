@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -73,10 +74,11 @@ fun AmountInputField(
     onBillInputChanged: (String) -> Unit = {},
     onBillInputCompleted: () -> Unit = {},
 ) {
+    val verticalSpacing = dimensionResource(R.dimen.vertical_space_between_rows)
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(start = 16.dp, end = 16.dp, top = verticalSpacing, bottom = 16.dp),
         value = billInputTextState.value,
         onValueChange = { newValue: String -> onBillInputChanged(newValue) },
         label = { Text(text = stringResource(R.string.enter_bill)) },
@@ -104,15 +106,16 @@ fun SplitSection(
     onSplitValueDecreased: () -> Unit = {},
 ) {
     Row {
+        val verticalSpacing = dimensionResource(R.dimen.vertical_space_between_rows)
         Box(
             modifier = Modifier
                 .align(Alignment.CenterVertically)
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 16.dp, vertical = verticalSpacing)
         ) {
             BottomCardText(value = stringResource(R.string.split))
         }
         Row(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = verticalSpacing)
         ) {
             IconImageButton(
                 icon = Icons.Default.Remove,
@@ -151,7 +154,8 @@ fun SliderSection(
     tipPercentState: MutableFloatState = mutableFloatStateOf(0.0f),
     onSliderValueChanged: (Float) -> Unit = {}
 ) {
-    Column(modifier = Modifier.padding(16.dp)) {
+    val verticalSpacing = dimensionResource(R.dimen.vertical_space_between_rows)
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = verticalSpacing)) {
         TipSlider(
             sliderPosition = tipPercentState,
             onSliderValueChanged

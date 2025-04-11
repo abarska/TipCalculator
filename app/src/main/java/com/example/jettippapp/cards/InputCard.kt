@@ -1,12 +1,7 @@
 package com.example.jettippapp.cards
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableDoubleState
@@ -18,14 +13,14 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.example.jettippapp.R
 
 @Preview
 @Composable
-fun BottomCard(
+fun InputCard(
+    modifier: Modifier = Modifier,
     totalBillState: MutableDoubleState = mutableDoubleStateOf(0.0),
     billInputTextState: MutableState<String> = mutableStateOf(""),
     splitBy: MutableIntState = mutableIntStateOf(1),
@@ -38,17 +33,7 @@ fun BottomCard(
     onBillInputChanged: (String) -> Unit = {},
     onBillInputCompleted: () -> Unit = {}
 ) {
-
-    OutlinedCard(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .background(
-                color = Color.Magenta,
-                shape = RoundedCornerShape(12.dp)
-            )
-            .fillMaxWidth()
-            .wrapContentHeight()
-    ) {
+    OutlinedCard(modifier = modifier) {
         AmountInputField(
             totalBillState = totalBillState,
             billInputTextState = billInputTextState,
@@ -56,14 +41,15 @@ fun BottomCard(
             onBillInputCompleted = onBillInputCompleted
         )
         if (billInputTextState.value.toDoubleOrNull() != null) {
+            val verticalSpacing = dimensionResource(R.dimen.vertical_space_between_rows)
             SplitSection(
                 splitBy = splitBy,
                 onSplitValueIncreased = onSplitValueIncreased,
                 onSplitValueDecreased = onSplitValueDecreased
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(verticalSpacing))
             TipAmountSection(tipAmountState)
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(verticalSpacing))
             SliderSection(
                 tipPercentState = tipPercentState,
                 onSliderValueChanged = onSliderValueChanged
