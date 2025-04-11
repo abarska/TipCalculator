@@ -33,7 +33,6 @@ import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -43,9 +42,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.jettippapp.R
-import com.example.jettippapp.util.calculateAmountPerPerson
-import com.example.jettippapp.util.calculateTip
-import kotlin.math.roundToInt
+import java.text.NumberFormat
+import java.util.Locale
 
 @Preview(showBackground = true)
 @Composable
@@ -58,8 +56,8 @@ fun TotalPerPersonLabelText() {
 
 @Preview(showBackground = true)
 @Composable
-fun TotalPerPersonAmountText(amount: Double = 100.00) {
-    val formattedPrice = stringResource(R.string.price_format).format(amount)
+fun TotalPerPersonAmountText(amount: MutableDoubleState = mutableDoubleStateOf(0.0)) {
+    val formattedPrice = stringResource(R.string.price_format).format(amount.doubleValue)
     Text(
         text = "$$formattedPrice",
         style = MaterialTheme.typography.headlineLarge
@@ -70,25 +68,15 @@ fun TotalPerPersonAmountText(amount: Double = 100.00) {
 @Composable
 fun AmountInputField(
     totalBillState: MutableState<String> = mutableStateOf(""),
-    amountPerPersonState: MutableDoubleState = mutableDoubleStateOf(0.0),
-    splitBy: MutableIntState = mutableIntStateOf(1),
-    tipAmountState: MutableDoubleState = mutableDoubleStateOf(0.0),
-    validBillState: Boolean = true,
     onAction: KeyboardActions = KeyboardActions.Default,
+    onBillInputChanged: (String) -> Unit = {},
 ) {
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         value = totalBillState.value,
-        onValueChange = { newValue: String ->
-            totalBillState.value = newValue.trimStart('0').ifEmpty { "" }
-            amountPerPersonState.doubleValue = calculateAmountPerPerson(
-                tipAmountState.doubleValue,
-                billAmount = if (validBillState) totalBillState.value.toDouble() else 0.0,
-                splitBy.intValue
-            )
-        },
+        onValueChange = { newValue: String -> onBillInputChanged(newValue) },
         label = { Text(text = stringResource(R.string.enter_bill)) },
         leadingIcon = {
             Icon(
@@ -109,10 +97,9 @@ fun AmountInputField(
 @Preview(showBackground = true)
 @Composable
 fun SplitSection(
-    totalBillState: MutableState<String> = mutableStateOf(""),
     splitBy: MutableIntState = mutableIntStateOf(1),
-    tipAmountState: MutableDoubleState = mutableDoubleStateOf(0.0),
-    amountPerPersonState: MutableDoubleState = mutableDoubleStateOf(0.0),
+    onSplitValueIncreased: () -> Unit = {},
+    onSplitValueDecreased: () -> Unit = {},
 ) {
     Row {
         Box(
@@ -128,14 +115,7 @@ fun SplitSection(
             IconImageButton(
                 icon = Icons.Default.Remove,
                 contentDescription = R.string.remove_icon,
-                onClick = {
-                    if (splitBy.intValue > 1) splitBy.intValue -= 1
-                    amountPerPersonState.doubleValue = calculateAmountPerPerson(
-                        tipAmountState.doubleValue,
-                        billAmount = totalBillState.value.toDouble(),
-                        splitBy.intValue
-                    )
-                })
+                onClick = { onSplitValueDecreased() })
             BottomCardText(
                 modifier = Modifier.align(Alignment.CenterVertically),
                 value = splitBy.intValue.toString()
@@ -143,14 +123,7 @@ fun SplitSection(
             IconImageButton(
                 icon = Icons.Default.Add,
                 contentDescription = R.string.add_icon,
-                onClick = {
-                    splitBy.intValue += 1
-                    amountPerPersonState.doubleValue = calculateAmountPerPerson(
-                        tipAmountState.doubleValue,
-                        billAmount = totalBillState.value.toDouble(),
-                        splitBy.intValue
-                    )
-                })
+                onClick = { onSplitValueIncreased() })
         }
     }
 }
@@ -173,22 +146,18 @@ fun TipAmountSection(tipAmountState: MutableDoubleState = mutableDoubleStateOf(0
 @Preview(showBackground = true)
 @Composable
 fun SliderSection(
-    tipAmountState: MutableDoubleState = mutableDoubleStateOf(0.0),
-    totalBillState: MutableState<String> = mutableStateOf(""),
-    splitBy: MutableIntState = mutableIntStateOf(1),
-    amountPerPersonState: MutableDoubleState = mutableDoubleStateOf(0.0)
+    tipPercentState: MutableFloatState = mutableFloatStateOf(0.0f),
+    onSliderValueChanged: (Float) -> Unit = {}
 ) {
     Column(modifier = Modifier.padding(16.dp)) {
-        val sliderState = rememberSaveable { mutableFloatStateOf(0f) }
         TipSlider(
-            sliderPosition = sliderState,
-            totalBillState = totalBillState,
-            tipAmountState = tipAmountState,
-            splitBy = splitBy,
-            amountPerPersonState = amountPerPersonState
+            sliderPosition = tipPercentState,
+            onSliderValueChanged
         )
         Spacer(modifier = Modifier.height(16.dp))
-        BottomCardText(value = "${sliderState.floatValue.roundToInt()}%")
+        BottomCardText(
+            value = NumberFormat.getPercentInstance(Locale.US).format(tipPercentState.floatValue)
+        )
     }
 }
 
@@ -206,24 +175,12 @@ fun BottomCardText(modifier: Modifier = Modifier, value: String = "text") {
 @Composable
 fun TipSlider(
     sliderPosition: MutableFloatState = mutableFloatStateOf(0.4f),
-    totalBillState: MutableState<String> = mutableStateOf("0.0"),
-    tipAmountState: MutableDoubleState = mutableDoubleStateOf(0.0),
-    splitBy: MutableIntState = mutableIntStateOf(1),
-    amountPerPersonState: MutableDoubleState = mutableDoubleStateOf(0.0),
+    onSliderValueChanged: (Float) -> Unit = {}
 ) {
     Slider(
         value = sliderPosition.floatValue,
-        valueRange = 0f..100f,
-        steps = 9,
-        onValueChange = { newValue ->
-            sliderPosition.floatValue = newValue
-            tipAmountState.doubleValue = calculateTip(newValue, totalBillState.value.toDouble())
-            amountPerPersonState.doubleValue = calculateAmountPerPerson(
-                tipAmountState.doubleValue,
-                billAmount = totalBillState.value.toDouble(),
-                splitBy.intValue
-            )
-        }
+        valueRange = 0f..1f,
+        onValueChange = { newValue -> onSliderValueChanged(newValue) }
     )
 }
 

@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableDoubleState
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,7 +20,7 @@ import androidx.compose.ui.unit.dp
 
 @Preview
 @Composable
-fun TopCard(amountPerPerson: Double = 0.0) {
+fun TopCard(amountPerPerson: MutableDoubleState = mutableDoubleStateOf(0.0)) {
     Card(
         modifier = Modifier
             .padding(horizontal = 16.dp)
