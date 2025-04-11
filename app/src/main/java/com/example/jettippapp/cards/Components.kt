@@ -67,15 +67,16 @@ fun TotalPerPersonAmountText(amount: MutableDoubleState = mutableDoubleStateOf(0
 @Preview(showBackground = true)
 @Composable
 fun AmountInputField(
-    totalBillState: MutableState<String> = mutableStateOf(""),
-    onAction: KeyboardActions = KeyboardActions.Default,
+    totalBillState: MutableDoubleState = mutableDoubleStateOf(0.0),
+    billInputTextState: MutableState<String> = mutableStateOf(""),
     onBillInputChanged: (String) -> Unit = {},
+    onBillInputCompleted: () -> Unit = {},
 ) {
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        value = totalBillState.value,
+        value = billInputTextState.value,
         onValueChange = { newValue: String -> onBillInputChanged(newValue) },
         label = { Text(text = stringResource(R.string.enter_bill)) },
         leadingIcon = {
@@ -90,7 +91,7 @@ fun AmountInputField(
             keyboardType = KeyboardType.Number,
             imeAction = ImeAction.Done
         ),
-        keyboardActions = onAction
+        keyboardActions = KeyboardActions(onDone = { onBillInputCompleted() }),
     )
 }
 

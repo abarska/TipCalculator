@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.jettippapp.cards.BottomCard
@@ -47,24 +48,14 @@ private fun MyApp() {
         ) { innerPadding ->
 
             // state variables
-            val totalBillState = rememberSaveable {
-                mutableStateOf("")
-            }
-            val validBillState = rememberSaveable(totalBillState.value) {
-                totalBillState.value.toDoubleOrNull() != null
-            }
-            val splitBy = rememberSaveable {
-                mutableIntStateOf(1)
-            }
-            val tipAmountState = rememberSaveable {
-                mutableDoubleStateOf(0.0)
-            }
-            val amountPerPersonState = rememberSaveable {
-                mutableDoubleStateOf(0.0)
-            }
-            val tipPercentState = rememberSaveable {
-                mutableFloatStateOf(0f)
-            }
+            val totalBillState = rememberSaveable { mutableDoubleStateOf(0.0) }
+            val billInputTextState = rememberSaveable { mutableStateOf("") }
+            val splitBy = rememberSaveable { mutableIntStateOf(1) }
+            val tipAmountState = rememberSaveable { mutableDoubleStateOf(0.0) }
+            val amountPerPersonState = rememberSaveable { mutableDoubleStateOf(0.0) }
+            val tipPercentState = rememberSaveable { mutableFloatStateOf(0f) }
+
+            val keyboardController = LocalSoftwareKeyboardController.current
 
             // callbacks
             val onSliderValueChanged = { newSliderValue: Float ->
@@ -73,10 +64,10 @@ private fun MyApp() {
                         .setScale(2, RoundingMode.HALF_UP)
                         .toFloat()
                 tipPercentState.floatValue = rounded
-                tipAmountState.doubleValue = calculateTip(rounded, totalBillState.value.toDouble())
+                tipAmountState.doubleValue = calculateTip(rounded, totalBillState.doubleValue)
                 amountPerPersonState.doubleValue = calculateAmountPerPerson(
                     tipAmountState.doubleValue,
-                    billAmount = totalBillState.value.toDouble(),
+                    billAmount = totalBillState.doubleValue,
                     splitBy.intValue
                 )
             }
@@ -84,7 +75,7 @@ private fun MyApp() {
                 if (splitBy.intValue > 1) splitBy.intValue -= 1
                 amountPerPersonState.doubleValue = calculateAmountPerPerson(
                     tipAmountState.doubleValue,
-                    billAmount = totalBillState.value.toDouble(),
+                    billAmount = totalBillState.doubleValue,
                     splitBy.intValue
                 )
             }
@@ -92,15 +83,19 @@ private fun MyApp() {
                 splitBy.intValue += 1
                 amountPerPersonState.doubleValue = calculateAmountPerPerson(
                     tipAmountState.doubleValue,
-                    billAmount = totalBillState.value.toDouble(),
+                    billAmount = totalBillState.doubleValue,
                     splitBy.intValue
                 )
             }
             val onBillInputChanged = { newInput: String ->
-                totalBillState.value = newInput.trimStart('0').ifEmpty { "" }
+                billInputTextState.value = newInput
+            }
+            val onBillInputCompleted = {
+                keyboardController?.hide()
+                totalBillState.doubleValue = billInputTextState.value.toDoubleOrNull() ?: 0.0
                 amountPerPersonState.doubleValue = calculateAmountPerPerson(
                     tipAmountState.doubleValue,
-                    billAmount = if (validBillState) totalBillState.value.toDouble() else 0.0,
+                    billAmount = totalBillState.doubleValue,
                     splitBy.intValue
                 )
             }
@@ -110,7 +105,7 @@ private fun MyApp() {
                 Spacer(modifier = Modifier.height(16.dp))
                 BottomCard(
                     totalBillState = totalBillState,
-                    validBillState = validBillState,
+                    billInputTextState = billInputTextState,
                     splitBy = splitBy,
                     tipAmountState = tipAmountState,
                     amountPerPersonState = amountPerPersonState,
@@ -119,6 +114,7 @@ private fun MyApp() {
                     onSplitValueIncreased = onSplitValueIncreased,
                     onSplitValueDecreased = onSplitValueDecreased,
                     onBillInputChanged = onBillInputChanged,
+                    onBillInputCompleted = onBillInputCompleted
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }

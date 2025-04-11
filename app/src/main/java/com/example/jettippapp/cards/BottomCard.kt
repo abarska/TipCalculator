@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableDoubleState
@@ -20,15 +19,14 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Preview
 @Composable
 fun BottomCard(
-    totalBillState: MutableState<String> = mutableStateOf(""),
-    validBillState: Boolean = false,
+    totalBillState: MutableDoubleState = mutableDoubleStateOf(0.0),
+    billInputTextState: MutableState<String> = mutableStateOf(""),
     splitBy: MutableIntState = mutableIntStateOf(1),
     tipAmountState: MutableDoubleState = mutableDoubleStateOf(0.0),
     amountPerPersonState: MutableDoubleState = mutableDoubleStateOf(0.0),
@@ -36,9 +34,9 @@ fun BottomCard(
     onSliderValueChanged: (Float) -> Unit = {},
     onSplitValueIncreased: () -> Unit = {},
     onSplitValueDecreased: () -> Unit = {},
-    onBillInputChanged: (String) -> Unit = {}
+    onBillInputChanged: (String) -> Unit = {},
+    onBillInputCompleted: () -> Unit = {}
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
 
     OutlinedCard(
         modifier = Modifier
@@ -52,13 +50,11 @@ fun BottomCard(
     ) {
         AmountInputField(
             totalBillState = totalBillState,
-            onAction = KeyboardActions {
-                if (!validBillState) return@KeyboardActions
-                keyboardController?.hide()
-            },
-            onBillInputChanged = onBillInputChanged
+            billInputTextState = billInputTextState,
+            onBillInputChanged = onBillInputChanged,
+            onBillInputCompleted = onBillInputCompleted
         )
-        if (validBillState) {
+        if (totalBillState.doubleValue > 0.0) {
             SplitSection(
                 splitBy = splitBy,
                 onSplitValueIncreased = onSplitValueIncreased,
