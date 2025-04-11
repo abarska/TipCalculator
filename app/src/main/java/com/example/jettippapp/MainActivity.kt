@@ -92,7 +92,10 @@ private fun MyApp() {
             }
             val onBillInputCompleted = {
                 keyboardController?.hide()
-                totalBillState.doubleValue = billInputTextState.value.toDoubleOrNull() ?: 0.0
+                totalBillState.doubleValue =
+                    billInputTextState.value.toDoubleOrNull() ?: 0.0
+                tipAmountState.doubleValue =
+                    calculateTip(tipPercentState.floatValue, totalBillState.doubleValue)
                 amountPerPersonState.doubleValue = calculateAmountPerPerson(
                     tipAmountState.doubleValue,
                     billAmount = totalBillState.doubleValue,
