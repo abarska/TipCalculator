@@ -35,6 +35,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -212,4 +213,13 @@ fun IconImageButton(
             )
         }
     }
+}
+
+@Composable
+fun ErrorMessage(@StringRes errorMessageRes: Int) {
+    Text(
+        modifier = Modifier.padding(16.dp),
+        text = stringResource(errorMessageRes),
+        style = MaterialTheme.typography.headlineSmall.copy(color = Color.Red)
+    )
 }

@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.jettippapp.R
 
 @Preview
 @Composable
@@ -54,7 +55,7 @@ fun BottomCard(
             onBillInputChanged = onBillInputChanged,
             onBillInputCompleted = onBillInputCompleted
         )
-        if (totalBillState.doubleValue > 0.0) {
+        if (billInputTextState.value.toDoubleOrNull() != null) {
             SplitSection(
                 splitBy = splitBy,
                 onSplitValueIncreased = onSplitValueIncreased,
@@ -67,6 +68,8 @@ fun BottomCard(
                 tipPercentState = tipPercentState,
                 onSliderValueChanged = onSliderValueChanged
             )
+        } else if (billInputTextState.value != "") {
+            ErrorMessage(R.string.invalid_input)
         }
     }
 }
