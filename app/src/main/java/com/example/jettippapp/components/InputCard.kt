@@ -1,4 +1,4 @@
-package com.example.jettippapp.cards
+package com.example.jettippapp.components
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -40,7 +40,7 @@ fun InputCard(
             onBillInputChanged = onBillInputChanged,
             onBillInputCompleted = onBillInputCompleted
         )
-        if (billInputTextState.value.toDoubleOrNull() != null) {
+        if (billInputTextState.value.toDoubleOrNull() != null && billInputTextState.value.toDouble() > 0) {
             val verticalSpacing = dimensionResource(R.dimen.vertical_space_between_rows)
             SplitSection(
                 splitBy = splitBy,

@@ -37,8 +37,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.jettippapp.cards.InputCard
-import com.example.jettippapp.cards.InfoCard
+import com.example.jettippapp.components.InputCard
+import com.example.jettippapp.components.InfoCard
 import com.example.jettippapp.ui.theme.JetTippAppTheme
 import com.example.jettippapp.util.calculateAmountPerPerson
 import com.example.jettippapp.util.calculateTip

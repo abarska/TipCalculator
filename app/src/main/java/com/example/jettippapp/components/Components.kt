@@ -1,4 +1,4 @@
-package com.example.jettippapp.cards
+package com.example.jettippapp.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable

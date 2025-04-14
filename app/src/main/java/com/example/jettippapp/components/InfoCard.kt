@@ -1,4 +1,4 @@
-package com.example.jettippapp.cards
+package com.example.jettippapp.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
